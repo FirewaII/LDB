@@ -89,23 +89,11 @@ void afficher_liste(struct liste_t *liste)
 
 void detruire_liste(struct liste_t **liste)
 {
-  if (liste==NULL){
-    return;
+  while (!est_vide_liste(*liste)){
+    struct cell_t *tmp = (*liste)->tete->suiv;
+    (*liste)->tete.suiv = tmp->suiv;
+    free(tmp);
   }
-  else if ((*liste) == NULL){
-    free(liste);
-    return;
-  }
-  else{
-    struct cell_t *cur = &((*liste)->tete);
-    struct cell_t *next;
-    while (cur->suiv){
-      if (cur->suiv->suiv != NULL){
-        next = cur->suiv->suiv;
-
-      }
-      cur = cur->suiv;
-    }
-    free(liste);
-  }
+  free(*liste);
+  *liste = NULL;
 }
