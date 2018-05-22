@@ -21,7 +21,7 @@ CFLAGS = -m32 -Wall -Werror -g -gstabs -std=c99 -nostdinc -fno-stack-protector -
 ASFLAGS = -m32 -DASSEMBLER -g -gstabs -I.
 LDFLAGS = -melf_i386
 # QEMUOPTS = -no-kvm -net nic -net user,tftp="`pwd`",bootfile="$(PXE)" -boot n -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234 -S
-QEMUOPTS = -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234  -kernel kernel.bin
+QEMUOPTS = -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234 -S -kernel kernel.bin
 
 # cible principale, on nettoie systematiquement le repertoire avant
 .PHONY: all

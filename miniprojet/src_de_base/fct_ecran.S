@@ -110,8 +110,7 @@ place_curseur:
     //    outb(pos && 0x00FF, 0x3D5);
     movw 8(%ebp), %ax
     outb %al, %dx
-    // posX
-    // posY
+
     
     leave
     ret

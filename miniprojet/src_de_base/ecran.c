@@ -13,8 +13,8 @@ void ecrit_car(uint32_t lig, uint32_t col, char c, uint32_t coul_texte, uint32_t
 
 void efface_ecran(void)
 {
-    for (uint32_t i = 0; i< 80; i++){
-        for (uint32_t j = 0; j< 25 ; j++){
+    for (uint32_t i = 0; i< 25; i++){
+        for (uint32_t j = 0; j< 79; j++){
             ecrit_car(i, j, ' ', 0, 0);
         }
     }
@@ -50,10 +50,32 @@ void traite_car(char c)
     }
     else{
         switch (c){
-            case 0 ... 31:
-                
+            case 8:
+                if (posX > 0){
+                    posX--;
+                }
+                break;
+            case 9:
+                posX = ((posX / 8) + 1) * 8;
+                if (posX > 79){
+                    posX = 0;
+                    posY++;
+                }
+                break;
+            case 10:
+                posX = 0;
+                posY++;
+                break;
+            case 12:
+                efface_ecran();
+                posX = 0;
+                posY = 0;
+                break;
+            case 13:
+                posX = 0;
+                break;
             default:
-                ecrit_car(posY, posY, c, 15, 0);
+                ecrit_car(posY, posX, c, 15, 0);
                 if (posX > 79){
                     if (posY > 24){
                         posY =0;
@@ -64,7 +86,9 @@ void traite_car(char c)
                 } else {
                     posX++;
                 }
-                place_cur(posY, posX);
         }
+        posX = posX % 79;
+        posY = posY % 24;
+        place_curseur(posY, posX);        
     }
 }
