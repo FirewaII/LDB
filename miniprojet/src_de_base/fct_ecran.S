@@ -4,11 +4,15 @@ uint16_t *ptr_mem(uint32_t lig, uint32_t col)
     return 0xB8000 + 2 * (lig x 80 + col)
 }
 */
+.data
+.comm posX, 4
+.comm posY, 4
 
 .text
 .globl ptr_mem
 .globl ecrit_car
 .globl place_curseur
+
 // uint32_t lig, uint32_t col
 // lig : %ebp + 8
 // col : %ebp + 12
@@ -83,24 +87,31 @@ place_curseur:
     enter $2, $0
     //    uint16_t pos = col + lig * 80;
     movl 8(%ebp), %eax
+    movw %eax, posY
     movl $80, %ecx
     mull %ecx
+    movw 12(%ebp), %ecx
+    movw %ecx, posX
     addl 12(%ebp), %eax
     //    outb(0x0F,0x3D4); 
     movb $0x0F, %al
     movw $0x3D4, %dx
     outb %al, %dx
     //    outb(pos && 0xFF00, 0x3D5);
-    movb %eax, %ax
     movw $0x3D5, %dx
+    movw 8(%ebp), %ax
+    movb %ah, %al
     outb %al, %dx
-    //    outb(0x0E, 0x3D4);
+
+    //    outb(0x0E,0x3D4); 
     movb $0x0E, %al
     movw $0x3D4, %dx
     outb %al, %dx
     //    outb(pos && 0x00FF, 0x3D5);
-    movb %eax, %ax
-    movw $0x3D5, %dx
-    outb %ah, %dx
+    movw 8(%ebp), %ax
+    outb %al, %dx
+    // posX
+    // posY
+    
     leave
     ret

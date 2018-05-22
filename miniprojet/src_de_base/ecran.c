@@ -42,3 +42,29 @@ void testAffiche()
     outb(0x0E, 0x3D4);
     outb(pos && 0x00FF, 0x3D5);
 }*/
+
+void traite_car(char c)
+{
+    if ( c < 0 || c > 127){
+        return;
+    }
+    else{
+        switch (c){
+            case 0 ... 31:
+                
+            default:
+                ecrit_car(posY, posY, c, 15, 0);
+                if (posX > 79){
+                    if (posY > 24){
+                        posY =0;
+                    }else{
+                       posY++; 
+                    }
+                    posX=0;
+                } else {
+                    posX++;
+                }
+                place_cur(posY, posX);
+        }
+    }
+}
