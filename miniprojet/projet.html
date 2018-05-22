@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <!-- base href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet.html" -->
+    <link rel="stylesheet" href="projet_files/style.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Cours de Logiciel de Base pour les alternants Ensimag 1AA">
+    <meta name="keywords" content="logiciel,base,assembleur,x86,x86_64,ia32,amd64">
+    <meta name="author" content="Christophe Rippert">
+    <title>Logiciel de base</title>
+</head>
+<body>
+    <div class="entete">
+        <h1><a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/ldb.html" target="_self">Logiciel de base</a></h1>
+        <h2><i>Mini-projet système</i></h2>
+        <br>
+    </div>
+
+    <h3>Introduction</h3>
+    <p>Le cours de Logiciel de Base se termine par un mini-projet 
+système : vous allez écrire un petit noyau de système d'exploitation en 
+utilisant ce que vous avez appris en C et en assembleur. Ce mini-projet 
+est en fait l'introduction au Projet système sur lequel vous 
+travaillerez en fin de deuxième année.</p>
+    <p>On rappelle au passage quelques opérations binaires en C qui seront utiles tout au long de ce projet :</p>
+    <ul>
+        <li>x décalé de n bits vers la gauche : <code>x &lt;&lt; n</code> ;</li>
+        <li>x décalé de n bits vers la droite : <code>x &gt;&gt; n</code> (attention si le type de x est signé, il s’agit d’un décalage arithmétique avec propagation du bit de signe) ;</li>
+        <li>forcer les 3 bits de poids faibles de x à 0 : <code>x &amp;= 0xF8</code> ;</li>
+        <li>forcer le bit de poids fort de x à 1 : <code>x |= 0x80</code> ;</li>
+        <li>calculer le not binaire de x : <code>~x</code> (bien lire "tilda x").</li>
+    </ul>
+
+    <h3>Supports pour le mini-projet</h3>
+
+    <h4>Prise en main de l'environnement de travail</h4>
+    <p>Lisez la <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet_env.pdf">documentation sur l'environnement</a>.</p>
+    <p>Téléchargez les <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/src_de_base.zip">sources de base</a>.</p>
+    <p><b>Pour travailler sur votre machine personnelle</b></p>
+    <p>Vous pouvez si vous le souhaitez travailler sur votre portable 
+personnel : tous les outils utilisés sont gratuits et disponibles en 
+ligne.</p>
+    <p>Si vous êtes sous Linux, la plupart des outils nécessaires 
+doivent déjà être installés ou peuvent l'être facilement via votre 
+gestionnaire de paquets favori. Notez qu'il faut une version 32 bits de 
+GCC pour compiler le noyau, si votre système ne dispose que d'outils 64 
+bits vous devrez l'installer avec votre gestionnaire de paquets favori.</p>
+    <p>Si vous êtes sous OSX, il vous faut un environnement de 
+développement gérant le format ELF 32 bits, ce qui n'est pas le cas du 
+compilateur CLANG fourni par Apple. Vous pouvez télécharger <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/toolchain_osx10_10.tar.7z">cette archive</a>
+ testée sous Yosemite et la décompresser (vous pouvez installer le 
+logiciel gratuit The Unarchiver depuis l'AppStore) dans le répertoire <code>/usr/local</code> (pensez à ajouter <code>/usr/local/i386-pc-elf/bin</code> à votre <code>PATH</code> ensuite). Il faut aussi modifier le fichier <code>kernel/Makefile</code> pour préfixer tous les appels à GCC et aux binutils par <code>i386-pc-elf-</code>.
+ Sous OSX, vous n'avez pas besoin d'utiliser de client VNC car QEmu 
+affiche directement sa console dans une fenêtre native du système.</p>
+
+    <h4>Gestion de l'écran</h4>
+    <p>Lisez la <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet_ecran.pdf">documentation sur la gestion de l'écran</a>.</p>
+    <p><b>Résumé du travail demandé :</b></p>
+    <p>Le but final est d'écrire une fonction <code>void console_putbytes(char *chaine, int32_t taille)</code>
+ qui affiche une chaine de caractères à la position courante du curseur.
+ Attention, vous devez respecter le nom et la spécification de cette 
+fonction car elle est appelée par d'autres fonctions du noyau, par 
+exemple <code>printf</code>.</p>
+    <p>A part celles pour laquelle c'est noté explicitement, toutes les 
+fonctions doivent être écrites en C. Pour les fonctions à écrire en 
+assembleur, il est recommandé de procéder en deux temps :</p>
+    <ul>
+        <li>écrire la fonction en C et la tester ;</li>
+        <li>traduire le code C systématiquement en assembleur x86.</li>
+    </ul>
+    <p>Pour tester en C les fonctions accédant aux ports d'entrée-sortie, vous pouvez utiliser les pseudo-fonctions C : <code>uint8_t inb(uint16_t port)</code> et <code>void outb(uint8_t val, uint16_t port)</code> (qui ne font en fait qu'appeler les instructions assembleur équivalentes).</p>
+    <p>Les fonctions en assembleur doivent être écrites dans des fichiers <code>fct_xxxx.S</code> (n'essayez pas d'inclure du code assembleur directement dans du code C : écrire du code assembleur <i>inline</i>
+ implique de respecter des contraintes complexes et complique grandement
+ la mise au point des fonctions). Notez que les fichiers doivent avoir 
+une extension en majuscules : la différence entre un fichier .s et .S 
+est que GCC fait passer le pré-processeur sur les fichiers .S avant 
+d'appeler l'assembleur, ce qui permet d'inclure des fichiers d'en-tête 
+.h et donc d'utiliser des constantes.</p>
+    <p>Pour arriver au but final vous pouvez par exemple implanter dans cet ordre :</p>
+    <ol>
+        <li>une fonction <code>uint16_t *ptr_mem(uint32_t lig, uint32_t col)</code> qui renvoie un pointeur sur la case mémoire correspondant aux coordonnées fournies : <b>cette fonction doit être écrite en assembleur</b> ;</li>
+        <li>une fonction <code>void ecrit_car(uint32_t lig, uint32_t col, char c, uint32_t coul_texte, uint32_t coul_fond)</code> qui écrit le caractère c aux coordonnées spécifiées : <b>cette fonction doit être écrite en assembleur</b> ;</li>
+        <li>une fonction <code>void efface_ecran(void)</code> qui doit 
+parcourir les lignes et les colonnes de l'écran pour écrire dans chaque 
+case un espace en blanc sur fond noir (afin d'initialiser les formats 
+dans la mémoire) ;</li>
+        <li>une fonction <code>void place_curseur(uint32_t lig, uint32_t col)</code> qui place le curseur à la position donnée : <b>cette fonction doit être écrite en assembleur</b> ;</li>
+        <li>une fonction <code>void traite_car(char c)</code> qui traite
+ un caractère donné (c'est à dire qui l'affiche si c'est un caractère 
+normal ou qui implante l'effet voulu si c'est un caractère de contrôle) ;</li>
+        <li>une fonction <code>void defilement(void)</code> qui fait remonter d'une ligne l'affichage à l'écran (il pourra être judicieux d'utiliser <code>memmove</code> définie dans <code>string.h</code> pour cela) ;</li>
+        <li>la fonction <code>console_putbytes</code> demandée, qui va sûrement utiliser les fonctions précédentes.</li>
+    </ol>
+    <p>Afin de vérifier le bon fonctionnement de vos différentes fonctions, le plus simple est de faire un affichage avec <code>printf</code> (définie dans <code>stdio.h</code>), car <code>printf</code> utilise <code>console_putbytes</code> pour l'affichage à l'écran.</p>
+    <p>Le module de gestion de l'écran doit garder en interne la 
+position courante du curseur, ainsi que les différents attributs 
+(couleur du texte, du fond), dans des variables globales.</p>
+    <p>Le bout de bibliothèque C fourni comprend de nombreuses fonctions
+ utiles : il faut s'en servir pour ne pas ré-inventer (et perdre du 
+temps à mettre au point) du code redondant ! Vous trouverez la 
+documentation des fonctions C dans les pages man habituelles : par 
+exemple, <code>man memmove</code> ou <code>man sprintf</code>.</p>
+
+    <h4>Gestion du temps</h4>
+    <p>Lisez la <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet_temps.pdf">documentation sur la gestion du temps</a>.</p>
+    <p><b>Résumé du travail demandé :</b></p>
+    <p>Le travail demandé peut être découpé de la façon suivante :</p>
+    <ol>
+        <li>écrire une fonction qui prend en paramètre une chaine de 
+caractères et l'affiche en haut à droite de l'écran : c'est cette 
+fonction qui sera appelée par le traitant d'interruption quand on devra 
+mettre à jour l'affichage de l'heure (fonction C à rajouter logiquement 
+dans votre module de gestion de l'écran) ;</li>
+        <li>écrire le traitant de l'interruption 32 qui affiche à 
+l'écran le temps écoulé depuis le démarrage du système : ce traitant 
+commence par une partie en assembleur pour sauvegarder les registres et 
+acquitter l'interruption, mais la partie gérant l'affichage doit être 
+faite dans une fonction en C qu'on appelera par exemple <code>void tic_PIT(void)</code> (on attire au passage votre attention sur l'existence dans la mini-libc fournie d'une fonction <code>sprintf</code> qui vous sera vraisemblablement utile) ;</li>
+        <li>initialiser l'entrée 32 dans la table des vecteurs d'interruptions, grace à une fonction <code>void init_traitant_IT32(void (*traitant)(void))</code> à écrire en C ;</li>
+        <li>régler la fréquence de l'horloge programmable : la fréquence
+ d'émission des signaux par l'horloge doit être une constante globale de
+ votre système, afin de permettre facilement de la changer : <b>cette fonction doit être écrite en assembleur</b> ;</li>
+        <li>démasquer l'IRQ0 pour autoriser les signaux en provenance de l'horloge : <b>cette fonction doit être écrite en assembleur</b> ;</li>
+        <li>démasquer les interruptions externes grâce à un appel à la 
+fonction sti() comme expliqué dans le squelette de code donné plus haut.</li>
+    </ol>
+
+    <h4>Gestion de la date</h4>
+    <p>Lisez la <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet_cal.pdf">documentation sur la gestion de l'horloge calendaire</a>.</p>
+    <p><b>Résumé du travail demandé :</b></p>
+    <p>On conseille de commencer par implanter les fonctions de lecture des informations du CMOS, c'est à dire :</p>
+    <ol>
+        <li>une fonction <code>uint8_t lit_CMOS(uint8_t reg)</code> qui renvoie en décimal la valeur lue dans le registre de numéro reg : <b>cette fonction doit être implantée en assembleur</b> (vous implanterez le décodage BCD → décimal dans cette fonction) ;</li>
+        <li>une fonction <code>void affiche_date(void)</code> qui lit 
+les différentes valeurs intéressantes du CMOS, les mets en forme dans 
+une chaine de caractères, et appelle une fonction <code>ecrit_date</code> pour réaliser l'affichage ;</li>
+        <li>une fonction <code>void ecrit_date(char *chaine)</code> à 
+ajouter dans votre module de gestion de l'écran et qui écrit la chaine 
+en haut à gauche de l'écran, de façon très similaire à la fonction <code>ecrit_temps</code> écrite précédemment pour gérer l'affichage de l'<i>uptime</i>.</li>
+    </ol>
+    <p>Ensuite, il faudra gérer l'interruption 40, ce qui peut être décomposé en écrivant :</p>
+    <ol>
+        <li>une fonction <code>void regle_frequence_RTC(void)</code> qui règle la fréquence et le type de signal de la RTC, <b>cette fonction doit être écrite en assembleur</b> ;</li>
+        <li>modifier ou étendre les fonctions que vous avez déjà écrites
+ pour la gestion de l'interruption 32, pour qu'elles puissent aussi 
+gérer l'interruption 40 ;</li>
+        <li>écrire la partie assembleur du traitant de l'interruption 
+40, comme expliqué plus haut (remarque : vous devez écrire un traitant 
+séparé de celui de l'interruption 32, il n'est pas recommandé de 
+chercher à écrire un traitant générique, mais vous pouvez fortement vous
+ inspirer du traitant existant).</li>
+    </ol>
+
+    <h4>Si vous avez fini en avance</h4>
+    <p>Vous pouvez ajouter la gestion du clavier à votre noyau. Pour 
+cela, il suffit d'écrire un traitant pour l'interruption 33, qui doit :</p>
+    <ul>
+        <li>acquitter l'IRQ1 ;</li>
+        <li>faire une lecture d'un octet sur le port 0x60.</li>
+    </ul>
+    <p>(et bien sûr également démasquer l'IRQ1 et enregistrer l'adresse 
+du traitant de l'interruption 33 dans la table des vecteurs 
+d'interruption)</p>
+    <p>La valeur lue correspond au code de la touche (<i>scancode</i>) :
+ décoder ce code pour obtenir le code ASCII de la touche est un 
+processus plus compliqué car il dépend du modèle de clavier utilisé.</p>
+
+    <h4>Si vous vous ennuyez vraiment</h4>
+    <p>Vous pouvez ajouter la gestion des processus à votre noyau : 
+attention, il s'agit d'un travail conséquent et complexe, donc 
+assurez-vous d'avoir fini correctement les parties précédentes avant de 
+vous lancer dedans.</p>
+    <p>Pour réaliser cette partie, vous aurez besoin de :</p>
+    <ul>
+        <li>la <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet_processus.pdf">documentation de base sur les processus</a> ;</li>
+        <li>la <a href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/projet_processus_isi.pdf">documentation avancée sur les processus</a> ;</li>
+        <li><a target="_self" href="http://chamilo.grenoble-inp.fr/courses/ENSIMAG3MM1LDB/document/src_projet_extra.zip">l'archive</a> contenant le code du changement de contexte et de l'allocateur dynamique.</li>
+    </ul>
+
+    <br>
+
+
+
+</body></html>

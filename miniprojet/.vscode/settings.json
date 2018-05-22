@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.s": "gas",
+        "stdint.h": "c",
+        "ecran.h": "c"
+    }
+}
