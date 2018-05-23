@@ -3,7 +3,7 @@
 #include <cpu.h>
 
 uint32_t posX, posY;
-
+uint32_t textColor, bgColor;
 
 
 
@@ -12,4 +12,7 @@ void ecrit_car(uint32_t lig, uint32_t col, char c, uint32_t coul_texte, uint32_t
 void efface_ecran(void);
 void testAffiche();
 void place_curseur(uint32_t lig, uint32_t col);
-void traite_car(char c);
+void traite_car(char c);        
+void test_trait_car();
+void test_stripes();
+void defilement();

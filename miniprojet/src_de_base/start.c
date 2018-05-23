@@ -23,39 +23,15 @@ void kernel_start(void)
     // quand on saura gerer l'ecran, on pourra afficher x
     //(void)x;
     // on ne doit jamais sortir de kernel_start
+    test_stripes();
     while (1) {
         // cette fonction arrete le processeur
+        //efface_ecran();
         //testAffiche();
-        //place_curseur(17, 9);
-        efface_ecran();
-        traite_car('T');        
-        traite_car('E');        
-        traite_car('S');        
-        traite_car('T');
-        traite_car('\n');
-        traite_car('J');        
-        traite_car('E');        
-        traite_car('R');        
-        traite_car('B');        
-        traite_car('\b');
-        traite_car('S');
-        traite_car('H');
-        traite_car('\t');
-        traite_car('A');
-        traite_car('A');
-        traite_car('\n');
-        traite_car('\n');
-        traite_car('\n');
-        traite_car('\n');
-        traite_car('L');
-        traite_car('F');
-        traite_car('\f');
-        traite_car('M');
-        traite_car('S');
-        traite_car('\r');
-        traite_car('A');
-        traite_car('A');
-        hlt();
+        //efface_ecran();
+        //test_trait_car();
+        defilement();
+        //hlt();
     }
 }
 

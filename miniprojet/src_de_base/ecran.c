@@ -1,5 +1,5 @@
 #include <ecran.h>
-
+#include <string.h>
 
 /*uint16_t *ptr_mem(uint32_t lig, uint32_t col)
 {
@@ -31,6 +31,36 @@ void testAffiche()
     ecrit_car(0, 79, 'B', 15, 0);
 }
 
+void test_trait_car()
+{
+    traite_car('T');        
+    traite_car('E');        
+    traite_car('S');        
+    traite_car('T');
+    traite_car('\n');
+    traite_car('J');        
+    traite_car('E');        
+    traite_car('R');        
+    traite_car('B');        
+    traite_car('\b');
+    traite_car('S');
+    traite_car('H');
+    traite_car('\t');
+    traite_car('A');
+    traite_car('A');
+    traite_car('\n');
+    traite_car('\n');
+    traite_car('\n');
+    traite_car('\n');
+    traite_car('L');
+    traite_car('F');
+    traite_car('\f');
+    traite_car('M');
+    traite_car('S');
+    traite_car('\r');
+    traite_car('A');
+    traite_car('A');
+}
 /*void place_curseur(uint32_t lig, uint32_t col)
 {
     // pos= col + lig × 80
@@ -58,8 +88,7 @@ void traite_car(char c)
             case 9:
                 posX = ((posX / 8) + 1) * 8;
                 if (posX > 79){
-                    posX = 0;
-                    posY++;
+                    posX = 79;
                 }
                 break;
             case 10:
@@ -92,3 +121,28 @@ void traite_car(char c)
         place_curseur(posY, posX);        
     }
 }
+
+void test_stripes()
+{
+    uint32_t bg1, bg2;
+    bg1 = 2;
+    bg2 = 4;
+    efface_ecran();
+    
+    for (uint32_t i = 0; i< 25; i++){
+        for (uint32_t j = 0; j< 80; j++){
+            if (i%2 == 0){
+                ecrit_car(i, j, ' ', 0, bg1);
+            } else {
+                ecrit_car(i, j, ' ', 0, bg2);
+            }
+        }
+    }
+}
+void defilement(void)
+{
+    // move every line to the previous
+    // line 0 is not moved
+    memmove(ptr_mem(0, 0), ptr_mem(1, 0), 4000);
+}
+

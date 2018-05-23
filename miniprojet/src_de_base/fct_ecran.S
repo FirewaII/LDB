@@ -7,6 +7,8 @@ uint16_t *ptr_mem(uint32_t lig, uint32_t col)
 .data
 .comm posX, 4
 .comm posY, 4
+.comm textColor, 4
+.comm bgColor, 4
 
 .text
 .globl ptr_mem
@@ -54,9 +56,11 @@ ecrit_car:
     movl 16(%ebp), %ecx
     movl %ecx, (%eax)
     movl 20(%ebp), %ecx
+    movl %ecx, textColor
     shll $8, %ecx
     orl %ecx, (%eax)
     movl 24(%ebp), %ecx
+    movl %ecx, bgColor
     shll $12, %ecx
     orl %ecx, (%eax)
     leave
