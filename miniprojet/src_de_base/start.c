@@ -23,15 +23,15 @@ void kernel_start(void)
     // quand on saura gerer l'ecran, on pourra afficher x
     //(void)x;
     // on ne doit jamais sortir de kernel_start
-    test_stripes();
+    set_default_colors(); 
     while (1) {
         // cette fonction arrete le processeur
-        //efface_ecran();
-        //testAffiche();
-        //efface_ecran();
-        //test_trait_car();
-        defilement();
-        //hlt();
+        efface_ecran();
+        test_stripes();
+        //defilement();
+        console_putbytes("BONJOUR", 7);
+        /*console_putbytes("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\tExcepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", 449);*/
+        hlt();
     }
 }
 

@@ -4,11 +4,6 @@ uint16_t *ptr_mem(uint32_t lig, uint32_t col)
     return 0xB8000 + 2 * (lig x 80 + col)
 }
 */
-.data
-.comm posX, 4
-.comm posY, 4
-.comm textColor, 4
-.comm bgColor, 4
 
 .text
 .globl ptr_mem
@@ -106,7 +101,6 @@ place_curseur:
     movw 8(%ebp), %ax
     movb %ah, %al
     outb %al, %dx
-
     //    outb(0x0E,0x3D4); 
     movb $0x0E, %al
     movw $0x3D4, %dx
@@ -114,7 +108,5 @@ place_curseur:
     //    outb(pos && 0x00FF, 0x3D5);
     movw 8(%ebp), %ax
     outb %al, %dx
-
-    
     leave
     ret

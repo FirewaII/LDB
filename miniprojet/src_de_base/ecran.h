@@ -1,6 +1,7 @@
 #define __ECRAN__
 #include <inttypes.h>
 #include <cpu.h>
+#include <string.h>
 
 uint32_t posX, posY;
 uint32_t textColor, bgColor;
@@ -16,3 +17,5 @@ void traite_car(char c);
 void test_trait_car();
 void test_stripes();
 void defilement();
+void console_putbytes(char* chaine, int32_t taille);
+void set_default_colors();

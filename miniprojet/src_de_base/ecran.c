@@ -1,5 +1,4 @@
 #include <ecran.h>
-#include <string.h>
 
 /*uint16_t *ptr_mem(uint32_t lig, uint32_t col)
 {
@@ -11,11 +10,13 @@ void ecrit_car(uint32_t lig, uint32_t col, char c, uint32_t coul_texte, uint32_t
     *ptr_mem(lig, col) = c | (coul_texte << 8) | (coul_fond << 12);
 }*/
 
+
 void efface_ecran(void)
 {
+    set_default_colors();    
     for (uint32_t i = 0; i< 25; i++){
         for (uint32_t j = 0; j< 79; j++){
-            ecrit_car(i, j, ' ', 0, 0);
+            ecrit_car(i, j, ' ', textColor, bgColor);
         }
     }
 }
@@ -61,18 +62,19 @@ void test_trait_car()
     traite_car('A');
     traite_car('A');
 }
-/*void place_curseur(uint32_t lig, uint32_t col)
+/*
+void place_curseur(uint32_t lig, uint32_t col)
 {
     // pos= col + lig × 80
     uint16_t pos = col + lig * 80;
     // 7 -> 0
     outb(0x0F,0x3D4);    
-    outb(pos && 0xFF00, 0x3D5);
+    outb(pos, 0x3D5);
     // 15 -> 8
     outb(0x0E, 0x3D4);
-    outb(pos && 0x00FF, 0x3D5);
-}*/
-
+    outb(pos << 8, 0x3D5);
+}
+*/
 void traite_car(char c)
 {
     if ( c < 0 || c > 127){
@@ -104,20 +106,21 @@ void traite_car(char c)
                 posX = 0;
                 break;
             default:
-                ecrit_car(posY, posX, c, 15, 0);
+                ecrit_car(posY, posX, c, textColor, bgColor);
                 if (posX > 79){
                     if (posY > 24){
-                        posY =0;
+                        defilement();
                     }else{
-                       posY++; 
+                        posY++; 
+                        posX=0;
                     }
-                    posX=0;
                 } else {
                     posX++;
                 }
         }
-        posX = posX % 79;
-        posY = posY % 24;
+        if (posY > 24){
+            defilement();
+        }
         place_curseur(posY, posX);        
     }
 }
@@ -128,8 +131,7 @@ void test_stripes()
     bg1 = 2;
     bg2 = 4;
     efface_ecran();
-    
-    for (uint32_t i = 0; i< 25; i++){
+    for (uint32_t i = 0; i< 30; i++){
         for (uint32_t j = 0; j< 80; j++){
             if (i%2 == 0){
                 ecrit_car(i, j, ' ', 0, bg1);
@@ -146,3 +148,16 @@ void defilement(void)
     memmove(ptr_mem(0, 0), ptr_mem(1, 0), 4000);
 }
 
+void console_putbytes(char* chaine, int32_t taille)
+{
+
+    for (int32_t i = 0; i < taille; i++){
+        traite_car(chaine[i]);
+    }
+}
+
+void set_default_colors()
+{
+    textColor = 15;
+    bgColor = 0;
+}
