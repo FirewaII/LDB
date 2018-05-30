@@ -1,163 +1,109 @@
-#include <ecran.h>
+#include "cpu.h"
+#include <inttypes.h>
+#define MEM_VIDEO 0xB8000
+#define PORT_CMD 0x3D4
+#define PORT_DATA 0x3D5
+#include "ecran.h"
+#include <string.h>
+uint32_t pos_x, pos_y;
 
-/*uint16_t *ptr_mem(uint32_t lig, uint32_t col)
-{
-    return (uint16_t*) (0xB8000 + 2 * (lig * 80 + col));
-}
+// uint16_t *ptr_mem(uint32_t lig, uint32_t col)
+// {
+//     uint16_t *ptr;
+//     ptr = ((uint16_t*)(MEM_VIDEO + 2 *( lig * 80 + col)));
+//     return ptr;
+// }
 
-void ecrit_car(uint32_t lig, uint32_t col, char c, uint32_t coul_texte, uint32_t coul_fond)
-{
-    *ptr_mem(lig, col) = c | (coul_texte << 8) | (coul_fond << 12);
-}*/
 
+// void ecrit_car(uint32_t lig, uint32_t col, char c, uint32_t coul_texte, uint32_t coul_fond)
+// {
+//
+//   *ptr_mem(lig,col)= c| (coul_texte<<8)| (coul_fond<<12);
+//
+// }
 
 void efface_ecran(void)
 {
-    set_default_colors();    
-    for (uint32_t i = 0; i< 25; i++){
-        for (uint32_t j = 0; j< 79; j++){
-            ecrit_car(i, j, ' ', textColor, bgColor);
-        }
-    }
+  uint32_t lig, col;
+ for (lig=0; lig<25;lig++){
+   for (col=0; col<80;col++){
+     ecrit_car(lig,col,' ',15,0);
+   }
+ }
 }
 
-void testAffiche()
-{
-    //efface_ecran();
-    ecrit_car(0, 0, 'K', 8, 0);
-    ecrit_car(20, 7, 'a', 3, 0);
-    ecrit_car(10, 15, 'Y', 5, 6);
-    ecrit_car(24, 79, 'Z', 15, 0);
-    ecrit_car(24, 0, 'A', 15, 0);
-    ecrit_car(0, 79, 'B', 15, 0);
-}
+// void place_curseur(uint32_t lig, uint32_t col){
+//     pos_x=col;
+//     pos_y=lig;
+//    uint16_t pos  =col+lig*80;
+//     outb(0x0F,PORT_CMD);
+//     outb(pos, PORT_DATA);
+//     outb(0x0E,PORT_CMD);
+//     outb(pos>>8, PORT_DATA);
+// }
 
-void test_trait_car()
-{
-    traite_car('T');        
-    traite_car('E');        
-    traite_car('S');        
-    traite_car('T');
-    traite_car('\n');
-    traite_car('J');        
-    traite_car('E');        
-    traite_car('R');        
-    traite_car('B');        
-    traite_car('\b');
-    traite_car('S');
-    traite_car('H');
-    traite_car('\t');
-    traite_car('A');
-    traite_car('A');
-    traite_car('\n');
-    traite_car('\n');
-    traite_car('\n');
-    traite_car('\n');
-    traite_car('L');
-    traite_car('F');
-    traite_car('\f');
-    traite_car('M');
-    traite_car('S');
-    traite_car('\r');
-    traite_car('A');
-    traite_car('A');
-}
-/*
-void place_curseur(uint32_t lig, uint32_t col)
-{
-    // pos= col + lig × 80
-    uint16_t pos = col + lig * 80;
-    // 7 -> 0
-    outb(0x0F,0x3D4);    
-    outb(pos, 0x3D5);
-    // 15 -> 8
-    outb(0x0E, 0x3D4);
-    outb(pos << 8, 0x3D5);
-}
-*/
-void traite_car(char c)
-{
-    if ( c < 0 || c > 127){
-        return;
+
+void traite_car(char c){
+  if (c>= 32 && c < 127)
+  {
+    if(pos_x==0 && pos_y==0)
+      {
+        ecrit_car(pos_y,pos_x,c,15,0);
+        pos_x++;
+      }
+    else if (pos_x==79){
+      place_curseur(pos_y+1,0);
+      ecrit_car(pos_y,pos_x,c,15,0);
     }
     else{
-        switch (c){
-            case 8:
-                if (posX > 0){
-                    posX--;
-                }
-                break;
-            case 9:
-                posX = ((posX / 8) + 1) * 8;
-                if (posX > 79){
-                    posX = 79;
-                }
-                break;
-            case 10:
-                posX = 0;
-                posY++;
-                break;
-            case 12:
-                efface_ecran();
-                posX = 0;
-                posY = 0;
-                break;
-            case 13:
-                posX = 0;
-                break;
-            default:
-                ecrit_car(posY, posX, c, textColor, bgColor);
-                if (posX > 79){
-                    if (posY > 24){
-                        defilement();
-                    }else{
-                        posY++; 
-                        posX=0;
-                    }
-                } else {
-                    posX++;
-                }
-        }
-        if (posY > 24){
-            defilement();
-        }
-        place_curseur(posY, posX);        
+      place_curseur(pos_y,pos_x+1);
+      ecrit_car(pos_y,pos_x,c,15,0);
     }
+  }
+  else if(c <=31){
+    switch(c)
+    {
+    case '\b':
+          if((pos_x) != 0)
+          {
+          place_curseur(pos_y,pos_x-1);
+          }
+          break;
+    case '\t':
+        place_curseur(pos_y, (pos_x!=80-1)?((pos_x/8)*8+8):25-1 );
+        break;
+    case '\n':
+      place_curseur(pos_y+1,0);
+      break;
+    case '\f':
+        efface_ecran();
+        place_curseur(0,0);
+        break;
+    case '\r':
+      place_curseur(pos_y,0);
+      break;
+    }
+  }
 }
 
-void test_stripes()
-{
-    uint32_t bg1, bg2;
-    bg1 = 2;
-    bg2 = 4;
-    efface_ecran();
-    for (uint32_t i = 0; i< 30; i++){
-        for (uint32_t j = 0; j< 80; j++){
-            if (i%2 == 0){
-                ecrit_car(i, j, ' ', 0, bg1);
-            } else {
-                ecrit_car(i, j, ' ', 0, bg2);
-            }
-        }
-    }
-}
 void defilement(void)
 {
-    // move every line to the previous
-    // line 0 is not moved
-    memmove(ptr_mem(0, 0), ptr_mem(1, 0), 4000);
+    memmove(ptr_mem(0, 0), ptr_mem(1, 0), 80 * 25 * 2);
+    place_curseur(pos_y - 1, pos_x);
 }
 
-void console_putbytes(char* chaine, int32_t taille)
+void console_putbytes(char *chaine, int32_t taille)
 {
-
-    for (int32_t i = 0; i < taille; i++){
+    for(int i = 0; i < taille; ++i){
         traite_car(chaine[i]);
     }
 }
-
-void set_default_colors()
+void affiche_haut_droite(char *chaine)
 {
-    textColor = 15;
-    bgColor = 0;
+  uint32_t l = strlen(chaine);
+  for(uint32_t i=0;i<=l;i++)
+  {
+    uint32_t pos = 80-l+i;
+     ecrit_car(0, pos, chaine[i],15,0);
+  }
 }
