@@ -17,7 +17,7 @@ uint64_t fact(uint64_t n)
 fact:
   enter $16, $0
   movq %rdi, -16(%rbp)
-  // if (n <= cat 1)
+  // if (n <= 1)
   cmpq $1, %rdi
   ja else
 
